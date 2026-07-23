@@ -3,16 +3,16 @@
 Emoji-Picker v2
 ===============
 Kompaktes Kontextmenü mit favorisierten Emojis, das sich in der Naehe des
-blinkenden Text-Cursors oeffnet. Auswahl per Klick oder Taste [1]-[0],
-danach wird das Emoji per Zwischenablage in das zuletzt fokussierte
-Textfeld eingefuegt und das Script beendet sich.
+Mauszeigers oeffnet (App-unabhaengig, kein Caret-Check noetig). Auswahl
+per Klick oder Taste [1]-[0], danach wird das Emoji per Zwischenablage in
+das zuletzt fokussierte Fenster eingefuegt und das Script beendet sich.
 
 Voraussetzungen: Windows, Python 3 mit Tkinter (Standard bei python.org-
 Installern). Keine zusaetzlichen pip-Pakete noetig, es wird ausschliesslich
 ctypes fuer die Win32-API-Aufrufe verwendet.
 
-Start ueber Tastenkombination (z.B. AHK v1 + Plugin "UserHotkeys"):
-    Run, pythonw.exe "C:\pfad\zu\emoji_picker_v2.py"
+Start ueber Tastenkombination via AHK v1 + Plugin "UserHotkeys", Befehl:
+    C:\...\Python\Python310\pythonw.exe "C:\...\Documents\01 Scripte\emoji_picker_v2.py"
 "pythonw.exe" statt "python.exe" verwenden, damit kein Konsolenfenster
 aufblitzt.
 """
@@ -39,41 +39,18 @@ EMOJIS = [
     ("0", "\U0001f534", "Rot"),     # 🔴
 ]
 
-CARET_OFFSET_X = -30
-CARET_OFFSET_Y = -30
+MENU_OFFSET_X = -30
+MENU_OFFSET_Y = -30
 
 # --- Win32-API-Signaturen ----------------------------------------------------
 # Explizite argtypes/restype sind auf 64-Bit-Windows noetig, da Handles/
 # Pointer sonst auf 32 Bit abgeschnitten werden.
 
-GUI_CARETBLINKING = 0x00000001
-
-
-class GUITHREADINFO(ctypes.Structure):
-    _fields_ = [
-        ("cbSize", wintypes.DWORD),
-        ("flags", wintypes.DWORD),
-        ("hwndActive", wintypes.HWND),
-        ("hwndFocus", wintypes.HWND),
-        ("hwndCapture", wintypes.HWND),
-        ("hwndMenuOwner", wintypes.HWND),
-        ("hwndMoveSize", wintypes.HWND),
-        ("hwndCaret", wintypes.HWND),
-        ("rcCaret", wintypes.RECT),
-    ]
-
-
 user32.GetForegroundWindow.restype = wintypes.HWND
 user32.GetForegroundWindow.argtypes = []
 
-user32.GetWindowThreadProcessId.restype = wintypes.DWORD
-user32.GetWindowThreadProcessId.argtypes = [wintypes.HWND, wintypes.LPDWORD]
-
-user32.GetGUIThreadInfo.restype = wintypes.BOOL
-user32.GetGUIThreadInfo.argtypes = [wintypes.DWORD, ctypes.POINTER(GUITHREADINFO)]
-
-user32.ClientToScreen.restype = wintypes.BOOL
-user32.ClientToScreen.argtypes = [wintypes.HWND, ctypes.POINTER(wintypes.POINT)]
+user32.GetCursorPos.restype = wintypes.BOOL
+user32.GetCursorPos.argtypes = [ctypes.POINTER(wintypes.POINT)]
 
 user32.SetForegroundWindow.restype = wintypes.BOOL
 user32.SetForegroundWindow.argtypes = [wintypes.HWND]
@@ -112,24 +89,12 @@ VK_V = 0x56
 KEYEVENTF_KEYUP = 0x0002
 
 
-def get_caret_screen_pos():
-    """Liefert (x, y) der linken oberen Ecke des blinkenden Carets in
-    Bildschirmkoordinaten, oder None wenn das fokussierte Fenster gerade
-    keinen aktiven Text-Caret hat (= kein Textfeld/Editor)."""
-    hwnd_fg = user32.GetForegroundWindow()
-    if not hwnd_fg:
-        return None
-
-    tid = user32.GetWindowThreadProcessId(hwnd_fg, None)
-    info = GUITHREADINFO()
-    info.cbSize = ctypes.sizeof(GUITHREADINFO)
-    if not user32.GetGUIThreadInfo(tid, ctypes.byref(info)):
-        return None
-    if not (info.flags & GUI_CARETBLINKING) or not info.hwndCaret:
-        return None
-
-    pt = wintypes.POINT(info.rcCaret.left, info.rcCaret.top)
-    user32.ClientToScreen(info.hwndCaret, ctypes.byref(pt))
+def get_cursor_pos():
+    """Liefert die aktuelle Mauszeiger-Position in Bildschirmkoordinaten.
+    Funktioniert unabhaengig von App/Steuerelement (anders als der
+    Caret-basierte Ansatz, der z.B. in Outlook/Obsidian nicht anschlug)."""
+    pt = wintypes.POINT()
+    user32.GetCursorPos(ctypes.byref(pt))
     return pt.x, pt.y
 
 
@@ -194,7 +159,7 @@ def show_picker(pos):
     root.withdraw()
     root.overrideredirect(True)
     root.attributes("-topmost", True)
-    root.configure(bg="#1e1e1e", highlightthickness=1, highlightbackground="#555555")
+    root.configure(bg="#fafafa", highlightthickness=1, highlightbackground="#c9c9c9")
 
     selected = {"emoji": None}
 
@@ -205,21 +170,23 @@ def show_picker(pos):
     def cancel(event=None):
         root.destroy()
 
-    frame = tk.Frame(root, bg="#1e1e1e", padx=3, pady=3)
+    frame = tk.Frame(root, bg="#fafafa", padx=3, pady=3)
     frame.pack()
 
     key_to_emoji = {}
     for key, emoji, label in EMOJIS:
         key_to_emoji[key] = emoji
 
-        row = tk.Frame(frame, bg="#1e1e1e")
+        row = tk.Frame(frame, bg="#fafafa")
         row.pack(fill="x")
 
-        key_lbl = tk.Label(row, text=key, width=2, fg="#888888", bg="#1e1e1e",
+        key_lbl = tk.Label(row, text=key, width=2, fg="#999999", bg="#fafafa",
                             font=("Segoe UI", 9, "bold"), anchor="e")
-        emo_lbl = tk.Label(row, text=emoji, width=2, bg="#1e1e1e",
-                            font=("Segoe UI Emoji", 12))
-        txt_lbl = tk.Label(row, text=label, fg="#e0e0e0", bg="#1e1e1e",
+        # Kein explizites fg: die Emoji-Glyphen sollen in ihren eigenen
+        # (farbigen) Font-Farben erscheinen, nicht in einer erzwungenen Farbe.
+        emo_lbl = tk.Label(row, text=emoji, width=2, bg="#fafafa",
+                            font=("Segoe UI Emoji", 14))
+        txt_lbl = tk.Label(row, text=label, fg="#202020", bg="#fafafa",
                             font=("Segoe UI", 9), anchor="w")
 
         key_lbl.pack(side="left", padx=(2, 4))
@@ -230,11 +197,11 @@ def show_picker(pos):
 
         def on_enter(event, ws=widgets):
             for w in ws:
-                w.configure(bg="#3a6ea5")
+                w.configure(bg="#cfe3fb")
 
         def on_leave(event, ws=widgets):
             for w in ws:
-                w.configure(bg="#1e1e1e")
+                w.configure(bg="#fafafa")
 
         def on_click(event, em=emoji):
             choose(em)
@@ -272,12 +239,9 @@ def show_picker(pos):
 
 
 def main():
-    caret = get_caret_screen_pos()
-    if caret is None:
-        return  # kein aktiver Text-Caret -> kein Textfeld, Menue nicht anzeigen
-
     target_hwnd = user32.GetForegroundWindow()
-    pos = (caret[0] + CARET_OFFSET_X, caret[1] + CARET_OFFSET_Y)
+    cursor = get_cursor_pos()
+    pos = (cursor[0] + MENU_OFFSET_X, cursor[1] + MENU_OFFSET_Y)
 
     emoji = show_picker(pos)
     if emoji:
