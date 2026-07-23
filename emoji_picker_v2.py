@@ -4,8 +4,14 @@ Emoji-Picker v2
 ===============
 Kompaktes Kontextmenü mit favorisierten Emojis, das sich in der Naehe des
 Mauszeigers oeffnet (App-unabhaengig, kein Caret-Check noetig). Auswahl
-per Klick oder Taste [1]-[0], danach wird das Emoji per Zwischenablage in
-das zuletzt fokussierte Fenster eingefuegt und das Script beendet sich.
+per Mausklick, danach wird das Emoji per Zwischenablage in das zuletzt
+fokussierte Fenster eingefuegt und das Menue schliesst sich wieder.
+
+Pin-Icon (oben rechts, Hotkey "ß"): heftet das Menue an, es bleibt dann
+dauerhaft sichtbar/verschiebbar (per Ziehen an der Kopfzeile) und jeder
+weitere Klick fuegt sofort ein weiteres Emoji ein, ohne zu schliessen.
+Das Icon wird dabei zum "✕"-Schliessen-Icon; ein Klick darauf (oder
+Escape) beendet das Menue endgueltig.
 
 Voraussetzungen: Windows, Python 3 mit Tkinter (Standard bei python.org-
 Installern). Keine zusaetzlichen pip-Pakete noetig, es wird ausschliesslich
@@ -41,6 +47,19 @@ EMOJIS = [
 
 MENU_OFFSET_X = -30
 MENU_OFFSET_Y = -30
+
+# --- Layout-Einstellungen (hier spaeter selbst anpassen) --------------------
+# Größe der Emojis (Schriftgröße in Punkt)
+EMOJI_FONT_SIZE = 11
+# Schriftgroesse fuer Zifferndarstellung und Beschriftungstext
+LABEL_FONT_SIZE = 7
+# Aussenabstand des gesamten Menues
+MENU_PADDING = 2
+# Abstand zwischen Ziffer/Emoji/Text je Zeile
+ROW_SPACING = 4
+# Tastenkuerzel (deutsches Tastaturlayout) zum Anheften/Schliessen
+PIN_KEYSYM = "ssharp"   # "ß"
+PIN_CHAR = "ß"     # Fallback, falls keysym nicht ankommt
 
 # --- Win32-API-Signaturen ----------------------------------------------------
 # Explizite argtypes/restype sind auf 64-Bit-Windows noetig, da Handles/
@@ -160,73 +179,126 @@ def insert_emoji(target_hwnd, emoji):
         set_clipboard_text(saved)
 
 
-def show_picker(pos):
+def show_picker(pos, target_hwnd):
     import tkinter as tk
+
+    BG = "#fafafa"
+    HOVER_BG = "#cfe3fb"
 
     root = tk.Tk()
     root.withdraw()
     root.overrideredirect(True)
     root.attributes("-topmost", True)
-    root.configure(bg="#fafafa", highlightthickness=1, highlightbackground="#c9c9c9")
+    root.configure(bg=BG, highlightthickness=1, highlightbackground="#c9c9c9")
 
-    selected = {"emoji": None}
+    pinned = {"value": False}
+    drag = {"x": 0, "y": 0, "win_x": 0, "win_y": 0}
 
-    def choose(emoji):
-        selected["emoji"] = emoji
-        root.destroy()
+    # --- Kopfzeile mit Pin/Schliessen-Icon oben rechts ----------------------
+    header = tk.Frame(root, bg=BG)
+    header.pack(fill="x", padx=MENU_PADDING, pady=(MENU_PADDING, 0))
 
-    def cancel(event=None):
-        root.destroy()
+    pin_lbl = tk.Label(header, bg=BG, cursor="hand2")
+    pin_lbl.pack(side="right")
 
-    frame = tk.Frame(root, bg="#fafafa", padx=3, pady=3)
+    def set_pin_visual():
+        if pinned["value"]:
+            pin_lbl.configure(text="✕", fg="#a03030",
+                               font=("Segoe UI", LABEL_FONT_SIZE, "bold"))
+        else:
+            # Kein explizites fg, aus demselben Grund wie bei den Emoji-
+            # Zeilen: die farbige Glyphe soll nicht eingefaerbt werden.
+            pin_lbl.configure(text="\U0001f4cc",
+                               font=("Segoe UI Emoji", LABEL_FONT_SIZE + 2))
+
+    def handle_pin_action(event=None):
+        if pinned["value"]:
+            root.destroy()
+        else:
+            pinned["value"] = True
+            # Das Einfuegen selbst loest per SetForegroundWindow() einen
+            # Fokusverlust am Menue aus. Ohne diesen Unbind wuerde sich das
+            # angeheftete Fenster durch sein eigenes Einfuegen wieder
+            # schliessen, statt wie gewuenscht offen zu bleiben.
+            root.unbind("<FocusOut>")
+            set_pin_visual()
+
+    pin_lbl.bind("<Button-1>", handle_pin_action)
+    set_pin_visual()
+
+    # Kopfzeile (ausser dem Icon selbst) dient als Ziehgriff zum Verschieben.
+    def start_drag(event):
+        drag["x"] = event.x_root
+        drag["y"] = event.y_root
+        drag["win_x"] = root.winfo_x()
+        drag["win_y"] = root.winfo_y()
+
+    def do_drag(event):
+        dx = event.x_root - drag["x"]
+        dy = event.y_root - drag["y"]
+        root.geometry(f"+{drag['win_x'] + dx}+{drag['win_y'] + dy}")
+
+    header.bind("<ButtonPress-1>", start_drag)
+    header.bind("<B1-Motion>", do_drag)
+
+    # --- Emoji-Zeilen --------------------------------------------------------
+    frame = tk.Frame(root, bg=BG, padx=MENU_PADDING, pady=MENU_PADDING)
     frame.pack()
 
-    key_to_emoji = {}
-    for key, emoji, label in EMOJIS:
-        key_to_emoji[key] = emoji
+    def activate(emoji):
+        if not pinned["value"]:
+            root.unbind("<FocusOut>")
+        insert_emoji(target_hwnd, emoji)
+        if not pinned["value"]:
+            root.destroy()
 
-        row = tk.Frame(frame, bg="#fafafa")
+    for key, emoji, label in EMOJIS:
+        row = tk.Frame(frame, bg=BG)
         row.pack(fill="x")
 
-        key_lbl = tk.Label(row, text=key, width=2, fg="#999999", bg="#fafafa",
-                            font=("Segoe UI", 9, "bold"), anchor="e")
+        key_lbl = tk.Label(row, text=key, width=2, fg="#999999", bg=BG,
+                            font=("Segoe UI", LABEL_FONT_SIZE, "bold"), anchor="e")
         # Kein explizites fg: die Emoji-Glyphen sollen in ihren eigenen
         # (farbigen) Font-Farben erscheinen, nicht in einer erzwungenen Farbe.
-        emo_lbl = tk.Label(row, text=emoji, width=2, bg="#fafafa",
-                            font=("Segoe UI Emoji", 14))
-        txt_lbl = tk.Label(row, text=label, fg="#202020", bg="#fafafa",
-                            font=("Segoe UI", 9), anchor="w")
+        emo_lbl = tk.Label(row, text=emoji, width=2, bg=BG,
+                            font=("Segoe UI Emoji", EMOJI_FONT_SIZE))
+        txt_lbl = tk.Label(row, text=label, fg="#202020", bg=BG,
+                            font=("Segoe UI", LABEL_FONT_SIZE), anchor="w")
 
-        key_lbl.pack(side="left", padx=(2, 4))
-        emo_lbl.pack(side="left", padx=(0, 6))
-        txt_lbl.pack(side="left", fill="x", expand=True, padx=(0, 6))
+        key_lbl.pack(side="left", padx=(2, 3))
+        emo_lbl.pack(side="left", padx=(0, ROW_SPACING))
+        txt_lbl.pack(side="left", fill="x", expand=True, padx=(0, ROW_SPACING))
 
         widgets = (row, key_lbl, emo_lbl, txt_lbl)
 
         def on_enter(event, ws=widgets):
             for w in ws:
-                w.configure(bg="#cfe3fb")
+                w.configure(bg=HOVER_BG)
 
         def on_leave(event, ws=widgets):
             for w in ws:
-                w.configure(bg="#fafafa")
+                w.configure(bg=BG)
 
         def on_click(event, em=emoji):
-            choose(em)
+            activate(em)
 
         for w in widgets:
             w.bind("<Enter>", on_enter)
             w.bind("<Leave>", on_leave)
             w.bind("<Button-1>", on_click)
 
+    # Nur noch Escape und der Pin-Hotkey sind als Tasten gebunden. Die
+    # frueheren Ziffern-Shortcuts [1]-[0] wurden bewusst entfernt: sobald das
+    # Menue angeheftet ist, soll normales Tippen (auch Ziffern) im Hintergrund
+    # nicht versehentlich Emojis auswaehlen - Auswahl erfolgt nur per Klick.
     def on_key(event):
         if event.keysym == "Escape":
-            cancel()
-        elif event.char in key_to_emoji:
-            choose(key_to_emoji[event.char])
+            root.destroy()
+        elif event.keysym == PIN_KEYSYM or event.char == PIN_CHAR:
+            handle_pin_action()
 
     root.bind("<Key>", on_key)
-    root.bind("<FocusOut>", cancel)
+    root.bind("<FocusOut>", lambda e: root.destroy())
 
     root.update_idletasks()
     w = root.winfo_reqwidth()
@@ -251,7 +323,6 @@ def show_picker(pos):
     root.grab_set()
 
     root.mainloop()
-    return selected["emoji"]
 
 
 def main():
@@ -259,9 +330,7 @@ def main():
     cursor = get_cursor_pos()
     pos = (cursor[0] + MENU_OFFSET_X, cursor[1] + MENU_OFFSET_Y)
 
-    emoji = show_picker(pos)
-    if emoji:
-        insert_emoji(target_hwnd, emoji)
+    show_picker(pos, target_hwnd)
 
 
 if __name__ == "__main__":
