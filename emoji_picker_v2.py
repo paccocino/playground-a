@@ -52,6 +52,14 @@ user32.GetForegroundWindow.argtypes = []
 user32.GetCursorPos.restype = wintypes.BOOL
 user32.GetCursorPos.argtypes = [ctypes.POINTER(wintypes.POINT)]
 
+user32.GetSystemMetrics.restype = ctypes.c_int
+user32.GetSystemMetrics.argtypes = [ctypes.c_int]
+
+SM_XVIRTUALSCREEN = 76
+SM_YVIRTUALSCREEN = 77
+SM_CXVIRTUALSCREEN = 78
+SM_CYVIRTUALSCREEN = 79
+
 user32.SetForegroundWindow.restype = wintypes.BOOL
 user32.SetForegroundWindow.argtypes = [wintypes.HWND]
 
@@ -223,10 +231,18 @@ def show_picker(pos):
     root.update_idletasks()
     w = root.winfo_reqwidth()
     h = root.winfo_reqheight()
-    screen_w = root.winfo_screenwidth()
-    screen_h = root.winfo_screenheight()
-    x = max(0, min(pos[0], screen_w - w))
-    y = max(0, min(pos[1], screen_h - h))
+
+    # Tk's winfo_screenwidth/-height kennt nur den primaeren Monitor. Bei
+    # mehreren Bildschirmen (z.B. Bildschirm 2 rechts von Bildschirm 1)
+    # braucht es die Win32-"virtual screen"-Metriken, die die gesamte
+    # Desktop-Flaeche ueber alle Monitore hinweg abdecken.
+    v_left = user32.GetSystemMetrics(SM_XVIRTUALSCREEN)
+    v_top = user32.GetSystemMetrics(SM_YVIRTUALSCREEN)
+    v_right = v_left + user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+    v_bottom = v_top + user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+
+    x = max(v_left, min(pos[0], v_right - w))
+    y = max(v_top, min(pos[1], v_bottom - h))
     root.geometry(f"+{x}+{y}")
 
     root.deiconify()
