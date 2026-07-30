@@ -70,10 +70,15 @@
 
   .calendar-widget {
     width: 100%;
-    background: var(--white);
+    background: rgba(255, 255, 255, 0.6);
     border: 1px solid #e2e2e2;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
     padding: 22px 22px 17px;
+    transition: background-color .3s ease;
+  }
+
+  .calendar-widget:hover {
+    background: var(--white);
   }
 
   .calendar-header {
@@ -620,7 +625,8 @@
       { name: "Jumbo-Textil", url: "https://www.jumbo-textil.de/", icon: "https://www.google.com/s2/favicons?sz=64&domain=www.jumbo-textil.de" },
       { name: "vombaur", url: "https://vombaur.de/", icon: "https://www.google.com/s2/favicons?sz=64&domain=vombaur.de" },
       { name: "Röthel", url: "https://roethel.com/", icon: "https://www.google.com/s2/favicons?sz=64&domain=roethel.com" },
-      { name: "Attelmann Architekten", url: "https://attelmann-architekten.de/", icon: "https://www.google.com/s2/favicons?sz=64&domain=attelmann-architekten.de" }
+      { name: "Attelmann Architekten", url: "https://attelmann-architekten.de/", icon: "https://www.google.com/s2/favicons?sz=64&domain=attelmann-architekten.de" },
+      { name: "QR Code Generator", url: "https://app.qr-code-generator.com/qrcodes?download=5286638&login=1", icon: "https://app.qr-code-generator.com/favicon.ico?f4ce7dae24968b5f" }
     ]
   ];
 

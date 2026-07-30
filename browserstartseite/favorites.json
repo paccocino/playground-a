@@ -46,6 +46,11 @@
       "name": "Attelmann Architekten",
       "url": "https://attelmann-architekten.de/",
       "icon": "https://www.google.com/s2/favicons?sz=64&domain=attelmann-architekten.de"
+    },
+    {
+      "name": "QR Code Generator",
+      "url": "https://app.qr-code-generator.com/qrcodes?download=5286638&login=1",
+      "icon": "https://app.qr-code-generator.com/favicon.ico?f4ce7dae24968b5f"
     }
   ]
 ]
