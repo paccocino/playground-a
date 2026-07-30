@@ -1,0 +1,15 @@
+[
+  [
+    { "name": "MOCO", "url": "https://stotz-design.mocoapp.com/projects" },
+    { "name": "SD CLOUD", "url": "https://stotz-design.cloud/index.php/apps/files/files/123?dir=/01-KUNDEN" }
+  ],
+  [
+    { "name": "Conmetallmeister", "url": "https://www.conmetallmeister.de/" },
+    { "name": "Textation Group", "url": "https://www.textation-group.com/" },
+    { "name": "Textation Karriere", "url": "https://karriere.textation-group.com/" },
+    { "name": "Jumbo-Textil", "url": "https://www.jumbo-textil.de/" },
+    { "name": "vombaur", "url": "https://vombaur.de/" },
+    { "name": "Röthel", "url": "https://roethel.com/" },
+    { "name": "Attelmann Architekten", "url": "https://attelmann-architekten.de/" }
+  ]
+]

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Startseite · stotz-design</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #8db22f;
+    --black: #000000;
+    --white: #ffffff;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: var(--white);
+    color: var(--black);
+    font-family: "Open Sans", sans-serif;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px 64px;
+  }
+
+  .top-accent {
+    width: 100%;
+    height: 4px;
+    background: var(--green);
+  }
+
+  /* ---------- Suche ---------- */
+
+  .search-wrap {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 12vh;
+    margin-bottom: 72px;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--white);
+    border: 1px solid #e2e2e2;
+    border-radius: 999px;
+    padding: 14px 22px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: box-shadow .25s ease, border-color .25s ease;
+  }
+
+  .search-form:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 2px 14px rgba(141, 178, 47, 0.25);
+  }
+
+  .search-form svg {
+    flex: none;
+    opacity: .45;
+  }
+
+  .search-form input[type="text"] {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--black);
+    background: transparent;
+  }
+
+  .search-form button {
+    flex: none;
+    border: none;
+    background: var(--green);
+    color: var(--white);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: filter .2s ease;
+  }
+
+  .search-form button:hover {
+    filter: brightness(0.93);
+  }
+
+  /* ---------- Favoriten ---------- */
+
+  .favorites {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .fav-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 36px 32px;
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--black);
+    width: 128px;
+  }
+
+  .tile-visual {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    margin-bottom: 26px;
+    transition: transform .35s cubic-bezier(.25,.8,.35,1);
+  }
+
+  .tile-visual::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -16px;
+    width: 78px;
+    height: 12px;
+    background: var(--black);
+    opacity: .16;
+    border-radius: 50%;
+    filter: blur(5px);
+    transform: translateX(-50%);
+    transition: all .35s cubic-bezier(.25,.8,.35,1);
+  }
+
+  .tile:hover .tile-visual,
+  .tile:focus-visible .tile-visual {
+    transform: translateY(-10px);
+  }
+
+  .tile:hover .tile-visual::after,
+  .tile:focus-visible .tile-visual::after {
+    opacity: .09;
+    width: 58px;
+    bottom: -12px;
+    filter: blur(7px);
+  }
+
+  .tile-icon {
+    width: 128px;
+    height: 128px;
+    background: var(--white);
+    border: 1px solid #ececec;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  .tile-icon img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+  }
+
+  .tile-icon .fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--green);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 34px;
+  }
+
+  .tile-label {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    html, body { background: var(--white); color: var(--black); }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-accent"></div>
+
+<div class="search-wrap">
+  <form class="search-form" action="https://www.google.com/search" method="GET">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <input type="text" name="q" autofocus autocomplete="off" placeholder="Google-Suche&hellip;">
+    <button type="submit">Suchen</button>
+  </form>
+</div>
+
+<div class="favorites" id="favorites"></div>
+
+<script>
+  // Fallback-Daten: greifen, wenn favorites.json nicht geladen werden kann
+  // (z.B. beim Testen als einzelne Datei ohne Webserver).
+  var FALLBACK_FAVORITES = [
+    [
+      { name: "MOCO", url: "https://stotz-design.mocoapp.com/projects" },
+      { name: "SD CLOUD", url: "https://stotz-design.cloud/index.php/apps/files/files/123?dir=/01-KUNDEN" }
+    ],
+    [
+      { name: "Conmetallmeister", url: "https://www.conmetallmeister.de/" },
+      { name: "Textation Group", url: "https://www.textation-group.com/" },
+      { name: "Textation Karriere", url: "https://karriere.textation-group.com/" },
+      { name: "Jumbo-Textil", url: "https://www.jumbo-textil.de/" },
+      { name: "vombaur", url: "https://vombaur.de/" },
+      { name: "Röthel", url: "https://roethel.com/" },
+      { name: "Attelmann Architekten", url: "https://attelmann-architekten.de/" }
+    ]
+  ];
+
+  function faviconUrl(pageUrl) {
+    var domain = new URL(pageUrl).hostname;
+    return "https://www.google.com/s2/favicons?sz=128&domain=" + domain;
+  }
+
+  function initials(name) {
+    var words = name.trim().split(/\s+/);
+    return (words[0][0] + (words[1] ? words[1][0] : "")).toUpperCase();
+  }
+
+  function renderFavorites(rows) {
+    var container = document.getElementById("favorites");
+    container.innerHTML = "";
+
+    rows.forEach(function (row) {
+      var rowEl = document.createElement("div");
+      rowEl.className = "fav-row";
+
+      row.forEach(function (item) {
+        var tile = document.createElement("a");
+        tile.className = "tile";
+        tile.href = item.url;
+        tile.target = "_blank";
+        tile.rel = "noopener";
+
+        var visual = document.createElement("div");
+        visual.className = "tile-visual";
+
+        var icon = document.createElement("div");
+        icon.className = "tile-icon";
+
+        var img = document.createElement("img");
+        img.src = faviconUrl(item.url);
+        img.alt = "";
+        img.loading = "lazy";
+        img.onerror = function () {
+          icon.innerHTML = '<div class="fallback">' + initials(item.name) + "</div>";
+        };
+        icon.appendChild(img);
+
+        var label = document.createElement("div");
+        label.className = "tile-label";
+        label.textContent = item.name;
+
+        visual.appendChild(icon);
+        tile.appendChild(visual);
+        tile.appendChild(label);
+        rowEl.appendChild(tile);
+      });
+
+      container.appendChild(rowEl);
+    });
+  }
+
+  fetch("favorites.json")
+    .then(function (res) {
+      if (!res.ok) throw new Error("favorites.json nicht gefunden");
+      return res.json();
+    })
+    .then(renderFavorites)
+    .catch(function () {
+      renderFavorites(FALLBACK_FAVORITES);
+    });
+</script>
+
+</body>
+</html>
