@@ -274,36 +274,43 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90px;
+    width: 45px;
     background: none;
     border: none;
     padding: 0;
     font-family: inherit;
     cursor: pointer;
     color: var(--black);
+    opacity: .55;
+    transition: opacity .2s ease;
+  }
+
+  .add-tile:hover {
+    opacity: 1;
   }
 
   .add-tile-icon {
-    width: 90px;
-    height: 90px;
-    margin-bottom: 22px;
-    border: 1px dashed var(--green);
+    width: 45px;
+    height: 45px;
+    margin-bottom: 12px;
+    border: 1px dashed #b7b7b7;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--green);
-    font-size: 30px;
+    font-size: 16px;
     font-weight: 300;
     background: transparent;
-    transition: background .2s ease;
+    transition: background .2s ease, border-color .2s ease;
   }
 
   .add-tile:hover .add-tile-icon {
     background: rgba(141, 178, 47, 0.1);
+    border-color: var(--green);
   }
 
   .add-tile-label {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--black);
   }
@@ -398,6 +405,30 @@
     opacity: 0.35;
   }
 
+  /* ---------- Export ---------- */
+
+  .export-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--white);
+    border: 1px solid #e2e2e2;
+    padding: 7px 12px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--black);
+    cursor: pointer;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+    z-index: 500;
+    opacity: .7;
+    transition: opacity .2s ease;
+  }
+
+  .export-btn:hover {
+    opacity: 1;
+  }
+
   @media (prefers-color-scheme: dark) {
     html, body {
       background: url("https://www.stotz-design.com/wp-content/uploads/2020/10/Digital_Campagning_office.jpg") center center / cover no-repeat fixed;
@@ -418,6 +449,8 @@
     <button type="submit">Suchen</button>
   </form>
 </div>
+
+<button type="button" class="export-btn" id="export-btn" title="Aktuelle Favoriten &amp; Reihenfolge als favorites.json herunterladen">⭳ Favoriten sichern</button>
 
 <div class="favorites" id="favorites"></div>
 
@@ -691,6 +724,19 @@
     });
   }
 
+  function exportFavorites() {
+    var blob = new Blob([JSON.stringify(currentRows, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = "favorites.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById("export-btn").addEventListener("click", exportFavorites);
   document.getElementById("modal-cancel").addEventListener("click", closeModal);
   document.getElementById("modal-save").addEventListener("click", saveModal);
   document.getElementById("modal-overlay").addEventListener("click", function (e) {
