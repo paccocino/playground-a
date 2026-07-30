@@ -30,10 +30,16 @@
   body {
     display: flex;
     flex-direction: column;
+    height: 100vh;
+  }
+
+  .row {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
-    padding: 24px;
+    padding: 0 24px;
   }
 
   .top-accent {
@@ -46,15 +52,12 @@
     z-index: 10;
   }
 
-  /* ---------- Suche & Kalender ---------- */
+  /* ---------- Kalender ---------- */
 
-  .hero {
+  .calendar-wrap {
+    position: relative;
     width: 100%;
-    max-width: 340px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 22px;
+    max-width: 600px;
   }
 
   .calendar-widget {
@@ -62,42 +65,42 @@
     background: var(--white);
     border: 1px solid #e2e2e2;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
-    padding: 18px 18px 14px;
+    padding: 22px 22px 17px;
   }
 
   .calendar-header {
     text-align: center;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: .02em;
-    margin-bottom: 14px;
+    margin-bottom: 17px;
     text-transform: capitalize;
   }
 
   .calendar-grid {
     display: grid;
-    grid-template-columns: 28px repeat(7, 1fr);
-    gap: 2px;
+    grid-template-columns: 34px repeat(7, 1fr);
+    gap: 3px;
   }
 
   .cal-cell {
-    height: 26px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 16px;
     font-variant-numeric: tabular-nums;
   }
 
   .cal-head {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     color: #9a9a9a;
     text-transform: uppercase;
   }
 
   .cal-week {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     color: #b3b3b3;
   }
@@ -116,8 +119,50 @@
     font-weight: 700;
   }
 
+  .cal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    background: var(--white);
+    border: 1px solid #e2e2e2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--black);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 5;
+  }
+
+  .calendar-wrap:hover .cal-nav:not(.is-disabled) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .cal-nav.is-disabled {
+    cursor: default;
+  }
+
+  .cal-prev {
+    left: -48px;
+  }
+
+  .cal-next {
+    right: -48px;
+  }
+
+  /* ---------- Suche ---------- */
+
   .search-form {
     width: 100%;
+    max-width: 600px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -168,17 +213,12 @@
   /* ---------- Favoriten ---------- */
 
   .favorites {
-    position: fixed;
-    left: 50%;
-    bottom: 150px;
-    transform: translateX(-50%);
     width: 100%;
     max-width: 1200px;
-    padding: 0 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 48px;
+    gap: 28px;
   }
 
   .row-divider {
@@ -509,12 +549,20 @@
 
 <div class="top-accent"></div>
 
-<div class="hero">
-  <div class="calendar-widget">
-    <div class="calendar-header" id="calendar-header"></div>
-    <div class="calendar-grid" id="calendar-grid"></div>
-  </div>
+<button type="button" class="export-btn" id="export-btn" title="Aktuelle Favoriten &amp; Reihenfolge als favorites.json herunterladen">⭳ Favoriten sichern</button>
 
+<div class="row row-calendar">
+  <div class="calendar-wrap">
+    <button type="button" class="cal-nav cal-prev" id="cal-prev" aria-label="Vorheriger Monat">‹</button>
+    <div class="calendar-widget">
+      <div class="calendar-header" id="calendar-header"></div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+    <button type="button" class="cal-nav cal-next" id="cal-next" aria-label="Nächster Monat">›</button>
+  </div>
+</div>
+
+<div class="row row-search">
   <form class="search-form" action="https://www.google.com/search" method="GET">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -524,9 +572,9 @@
   </form>
 </div>
 
-<button type="button" class="export-btn" id="export-btn" title="Aktuelle Favoriten &amp; Reihenfolge als favorites.json herunterladen">⭳ Favoriten sichern</button>
-
-<div class="favorites" id="favorites"></div>
+<div class="row row-favorites">
+  <div class="favorites" id="favorites"></div>
+</div>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
@@ -572,6 +620,8 @@
 
   var MONTH_NAMES = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
   var WEEKDAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  var MONTH_OFFSET_LIMIT = 12;
+  var monthOffset = 0;
 
   function isoWeek(date) {
     var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -582,10 +632,21 @@
     return 1 + Math.round(diff / (7 * 24 * 3600 * 1000));
   }
 
+  function shiftMonth(delta) {
+    var next = monthOffset + delta;
+    if (next < -MONTH_OFFSET_LIMIT || next > MONTH_OFFSET_LIMIT) return;
+    monthOffset = next;
+    renderCalendar();
+  }
+
   function renderCalendar() {
     var today = new Date();
-    var year = today.getFullYear();
-    var month = today.getMonth();
+    var displayed = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+    var year = displayed.getFullYear();
+    var month = displayed.getMonth();
+
+    document.getElementById("cal-prev").classList.toggle("is-disabled", monthOffset <= -MONTH_OFFSET_LIMIT);
+    document.getElementById("cal-next").classList.toggle("is-disabled", monthOffset >= MONTH_OFFSET_LIMIT);
 
     document.getElementById("calendar-header").textContent = MONTH_NAMES[month] + " " + year;
 
@@ -864,6 +925,8 @@
     URL.revokeObjectURL(url);
   }
 
+  document.getElementById("cal-prev").addEventListener("click", function () { shiftMonth(-1); });
+  document.getElementById("cal-next").addEventListener("click", function () { shiftMonth(1); });
   renderCalendar();
 
   document.getElementById("export-btn").addEventListener("click", exportFavorites);
