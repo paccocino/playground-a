@@ -1,0 +1,56 @@
+[
+  [
+    {
+      "name": "MOCO",
+      "url": "https://stotz-design.mocoapp.com/projects",
+      "icon": "https://stotz-design.mocoapp.com/assets/moco-icon-webapp-a682a5eae029a2bc43449d39b83cea09e1ffffcef2335162373b86bd2ab38998.png"
+    },
+    {
+      "name": "SD CLOUD",
+      "url": "https://stotz-design.cloud/index.php/apps/files/files/123?dir=/01-KUNDEN",
+      "icon": "https://stotz-design.cloud/index.php/apps/theming/favicon/files?v=e01c3831"
+    }
+  ],
+  [
+    {
+      "name": "Conmetallmeister",
+      "url": "https://www.conmetallmeister.de/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=www.conmetallmeister.de"
+    },
+    {
+      "name": "Textation Group",
+      "url": "https://www.textation-group.com/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=www.textation-group.com"
+    },
+    {
+      "name": "Textation Karriere",
+      "url": "https://karriere.textation-group.com/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=www.textation-group.com"
+    },
+    {
+      "name": "Jumbo-Textil",
+      "url": "https://www.jumbo-textil.de/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=www.jumbo-textil.de"
+    },
+    {
+      "name": "vombaur",
+      "url": "https://vombaur.de/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=vombaur.de"
+    },
+    {
+      "name": "Röthel",
+      "url": "https://roethel.com/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=roethel.com"
+    },
+    {
+      "name": "Attelmann Architekten",
+      "url": "https://attelmann-architekten.de/",
+      "icon": "https://www.google.com/s2/favicons?sz=64&domain=attelmann-architekten.de"
+    },
+    {
+      "name": "QR Code Generator",
+      "url": "https://app.qr-code-generator.com/qrcodes?download=5286638&login=1",
+      "icon": "https://app.qr-code-generator.com/favicon.ico?f4ce7dae24968b5f"
+    }
+  ]
+]
