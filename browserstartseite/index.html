@@ -208,6 +208,196 @@
     color: var(--black);
   }
 
+  /* ---------- Kachel-Menü (Ändern / Löschen) ---------- */
+
+  .tile-menu-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    background: var(--white);
+    border: 1px solid #ececec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--black);
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity .15s ease;
+    z-index: 2;
+  }
+
+  .tile:hover .tile-menu-btn,
+  .tile:focus-within .tile-menu-btn,
+  .tile-menu-btn.is-open {
+    opacity: 1;
+  }
+
+  .tile-menu {
+    position: absolute;
+    top: 28px;
+    right: 4px;
+    min-width: 104px;
+    background: var(--white);
+    border: 1px solid #ececec;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    z-index: 3;
+    display: none;
+    flex-direction: column;
+  }
+
+  .tile-menu.is-open {
+    display: flex;
+  }
+
+  .tile-menu button {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--black);
+    cursor: pointer;
+  }
+
+  .tile-menu button:hover {
+    background: #f2f2f2;
+  }
+
+  /* ---------- Favorit hinzufügen ---------- */
+
+  .add-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    cursor: pointer;
+    color: var(--black);
+  }
+
+  .add-tile-icon {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 22px;
+    border: 1px dashed var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green);
+    font-size: 30px;
+    font-weight: 300;
+    background: transparent;
+    transition: background .2s ease;
+  }
+
+  .add-tile:hover .add-tile-icon {
+    background: rgba(141, 178, 47, 0.1);
+  }
+
+  .add-tile-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+  }
+
+  /* ---------- Popup ---------- */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+
+  .modal-overlay.is-open {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--white);
+    border: 1px solid #000;
+    width: 320px;
+    max-width: 100%;
+    padding: 24px;
+  }
+
+  .modal h2 {
+    margin: 0 0 18px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .modal label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .modal label span {
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .modal input {
+    width: 100%;
+    border: 1px solid #cccccc;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--black);
+  }
+
+  .modal input:focus {
+    outline: none;
+    border-color: var(--green);
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .modal-actions button {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .modal-cancel {
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid #cccccc !important;
+  }
+
+  .modal-save {
+    background: var(--green);
+    color: var(--white);
+  }
+
+  /* ---------- Drag & Drop ---------- */
+
+  .tile.dragging {
+    opacity: 0.35;
+  }
+
   @media (prefers-color-scheme: dark) {
     html, body {
       background: url("https://www.stotz-design.com/wp-content/uploads/2020/10/Digital_Campagning_office.jpg") center center / cover no-repeat fixed;
@@ -231,6 +421,24 @@
 
 <div class="favorites" id="favorites"></div>
 
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title">Favorit hinzufügen</h2>
+    <label>
+      <span>Titel</span>
+      <input type="text" id="modal-name" autocomplete="off">
+    </label>
+    <label>
+      <span>URL</span>
+      <input type="text" id="modal-url" autocomplete="off" placeholder="https://...">
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="modal-cancel" id="modal-cancel">Abbrechen</button>
+      <button type="button" class="modal-save" id="modal-save">Speichern</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // Fallback-Daten: greifen, wenn favorites.json nicht geladen werden kann
   // (z.B. beim Testen als einzelne Datei ohne Webserver).
@@ -250,6 +458,11 @@
     ]
   ];
 
+  var STORAGE_KEY = "sd_startpage_favorites";
+  var currentRows = [];
+  var openMenuEl = null;
+  var modalMode = null; // { rowIndex, itemIndex } (itemIndex undefined = "add")
+
   function faviconUrl(pageUrl) {
     var domain = new URL(pageUrl).hostname;
     return "https://www.google.com/s2/favicons?sz=64&domain=" + domain;
@@ -260,7 +473,94 @@
     return (words[0][0] + (words[1] ? words[1][0] : "")).toUpperCase();
   }
 
+  function normalizeUrl(value) {
+    value = value.trim();
+    if (!/^https?:\/\//i.test(value)) {
+      value = "https://" + value;
+    }
+    return value;
+  }
+
+  function saveFavorites() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentRows));
+  }
+
+  function closeMenu() {
+    if (openMenuEl) {
+      openMenuEl.querySelector(".tile-menu").classList.remove("is-open");
+      openMenuEl.querySelector(".tile-menu-btn").classList.remove("is-open");
+      openMenuEl = null;
+    }
+  }
+
+  function getDragAfterElement(row, x) {
+    var els = Array.prototype.slice.call(row.querySelectorAll(".tile:not(.dragging)"));
+    return els.reduce(function (closest, child) {
+      var box = child.getBoundingClientRect();
+      var offset = x - box.left - box.width / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      }
+      return closest;
+    }, { offset: -Infinity, element: null }).element;
+  }
+
+  function syncOrderFromDOM() {
+    var rows = [];
+    document.querySelectorAll(".fav-row").forEach(function (rowEl) {
+      var items = [];
+      rowEl.querySelectorAll(".tile").forEach(function (tileEl) {
+        items.push(JSON.parse(tileEl.dataset.item));
+      });
+      rows.push(items);
+    });
+    currentRows = rows;
+    saveFavorites();
+  }
+
+  function openModal(rowIndex, itemIndex) {
+    modalMode = { rowIndex: rowIndex, itemIndex: itemIndex };
+    var isEdit = itemIndex !== undefined;
+    document.getElementById("modal-title").textContent = isEdit ? "Favorit ändern" : "Favorit hinzufügen";
+    document.getElementById("modal-name").value = isEdit ? currentRows[rowIndex][itemIndex].name : "";
+    document.getElementById("modal-url").value = isEdit ? currentRows[rowIndex][itemIndex].url : "";
+    document.getElementById("modal-overlay").classList.add("is-open");
+    document.getElementById("modal-name").focus();
+  }
+
+  function closeModal() {
+    document.getElementById("modal-overlay").classList.remove("is-open");
+    modalMode = null;
+  }
+
+  function saveModal() {
+    var name = document.getElementById("modal-name").value.trim();
+    var url = document.getElementById("modal-url").value.trim();
+    if (!name || !url) return;
+    url = normalizeUrl(url);
+
+    var item = { name: name, url: url, icon: faviconUrl(url) };
+
+    if (modalMode.itemIndex !== undefined) {
+      currentRows[modalMode.rowIndex][modalMode.itemIndex] = item;
+    } else {
+      currentRows[modalMode.rowIndex].push(item);
+    }
+
+    saveFavorites();
+    renderFavorites(currentRows);
+    closeModal();
+  }
+
+  function deleteFavorite(rowIndex, itemIndex) {
+    currentRows[rowIndex].splice(itemIndex, 1);
+    saveFavorites();
+    renderFavorites(currentRows);
+  }
+
   function renderFavorites(rows) {
+    currentRows = rows;
+    closeMenu();
     var container = document.getElementById("favorites");
     container.innerHTML = "";
 
@@ -274,12 +574,14 @@
       var rowEl = document.createElement("div");
       rowEl.className = "fav-row";
 
-      row.forEach(function (item) {
+      row.forEach(function (item, itemIndex) {
         var tile = document.createElement("a");
         tile.className = "tile";
         tile.href = item.url;
         tile.target = "_blank";
         tile.rel = "noopener";
+        tile.draggable = true;
+        tile.dataset.item = JSON.stringify(item);
 
         var visual = document.createElement("div");
         visual.className = "tile-visual";
@@ -296,29 +598,129 @@
         };
         icon.appendChild(img);
 
+        var menuBtn = document.createElement("button");
+        menuBtn.type = "button";
+        menuBtn.className = "tile-menu-btn";
+        menuBtn.textContent = "⋮";
+        menuBtn.setAttribute("aria-label", "Optionen");
+
+        var menu = document.createElement("div");
+        menu.className = "tile-menu";
+
+        var editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.textContent = "Ändern";
+        editBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeMenu();
+          openModal(rowIndex, itemIndex);
+        });
+
+        var deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "Löschen";
+        deleteBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeMenu();
+          deleteFavorite(rowIndex, itemIndex);
+        });
+
+        menu.appendChild(editBtn);
+        menu.appendChild(deleteBtn);
+
+        menuBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var alreadyOpen = menu.classList.contains("is-open");
+          closeMenu();
+          if (!alreadyOpen) {
+            menu.classList.add("is-open");
+            menuBtn.classList.add("is-open");
+            openMenuEl = visual;
+          }
+        });
+
         var label = document.createElement("div");
         label.className = "tile-label";
         label.textContent = item.name;
 
         visual.appendChild(icon);
+        visual.appendChild(menuBtn);
+        visual.appendChild(menu);
         tile.appendChild(visual);
         tile.appendChild(label);
+
+        tile.addEventListener("dragstart", function () {
+          tile.classList.add("dragging");
+        });
+        tile.addEventListener("dragend", function () {
+          tile.classList.remove("dragging");
+          syncOrderFromDOM();
+        });
+
         rowEl.appendChild(tile);
+      });
+
+      var addTile = document.createElement("button");
+      addTile.type = "button";
+      addTile.className = "add-tile";
+      addTile.innerHTML = '<div class="add-tile-icon">+</div><div class="add-tile-label">Hinzufügen</div>';
+      addTile.addEventListener("click", function () {
+        openModal(rowIndex);
+      });
+      rowEl.appendChild(addTile);
+
+      rowEl.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        var dragging = document.querySelector(".tile.dragging");
+        if (!dragging) return;
+        var afterElement = getDragAfterElement(rowEl, e.clientX);
+        if (afterElement) {
+          rowEl.insertBefore(dragging, afterElement);
+        } else {
+          rowEl.insertBefore(dragging, addTile);
+        }
+      });
+      rowEl.addEventListener("drop", function (e) {
+        e.preventDefault();
       });
 
       container.appendChild(rowEl);
     });
   }
 
-  fetch("favorites.json")
-    .then(function (res) {
-      if (!res.ok) throw new Error("favorites.json nicht gefunden");
-      return res.json();
-    })
-    .then(renderFavorites)
-    .catch(function () {
-      renderFavorites(FALLBACK_FAVORITES);
-    });
+  document.getElementById("modal-cancel").addEventListener("click", closeModal);
+  document.getElementById("modal-save").addEventListener("click", saveModal);
+  document.getElementById("modal-overlay").addEventListener("click", function (e) {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") closeModal();
+  });
+  document.addEventListener("click", function (e) {
+    if (openMenuEl && !openMenuEl.contains(e.target)) closeMenu();
+  });
+
+  var stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) {
+    try {
+      renderFavorites(JSON.parse(stored));
+    } catch (e) {
+      renderFavorites(JSON.parse(JSON.stringify(FALLBACK_FAVORITES)));
+    }
+  } else {
+    fetch("favorites.json")
+      .then(function (res) {
+        if (!res.ok) throw new Error("favorites.json nicht gefunden");
+        return res.json();
+      })
+      .then(renderFavorites)
+      .catch(function () {
+        renderFavorites(JSON.parse(JSON.stringify(FALLBACK_FAVORITES)));
+      });
+  }
 </script>
 
 </body>
