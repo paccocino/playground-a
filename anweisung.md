@@ -18,10 +18,21 @@
 
 **Favoriten**
 
-- Reihe 1: MOCO (`https://stotz-design.mocoapp.com/projects`), SD CLOUD (`https://stotz-design.cloud/index.php/apps/files/files/123?dir=/01-KUNDEN`)
-- Reihe 2: Conmetallmeister, Textation Group, Textation Karriere, Jumbo-Textil, vombaur, Röthel, Attelmann Architekten
+Eigene Favoriten:
+	Reihe 1:
+	https://stotz-design.mocoapp.com/projects (MOCO)
+	https://stotz-design.cloud/index.php/apps/files/files/123?dir=/01-KUNDEN (SD CLOUD)
+	Reihe 2:
+	https://www.conmetallmeister.de/
+	https://www.textation-group.com/ (Textation Group)
+	https://karriere.textation-group.com/ (Textation Group: Karriereseite)
+	https://www.jumbo-textil.de/
+	https://vombaur.de/
+	https://roethel.com/
+	https://attelmann-architekten.de/
+	
 - Dezente 1px `#ccc`-Trennlinie zwischen Reihe 1 und Reihe 2
-- Favoriten-Block als Ganzes ca. 150px über dem unteren Bildschirmrand fixiert
+- Favoriten-Block als Ganzes ca. 20vh über dem unteren Bildschirmrand fixiert
 - Container-Breite max. 1200px
 - Kacheln (Favicon-Quadrate): 90×90px, weiß, eckig
 - Flacher Schatten unterm Quadrat (nicht dahinter), 75px breit, wirkt wie schwebend
