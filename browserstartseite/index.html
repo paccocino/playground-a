@@ -54,6 +54,14 @@
 
   /* ---------- Kalender ---------- */
 
+  .calendar-hover-zone {
+    width: 780px;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 90px;
+  }
+
   .calendar-wrap {
     position: relative;
     width: 100%;
@@ -137,13 +145,14 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     opacity: 0;
     pointer-events: none;
-    transition: opacity .2s ease;
+    transition: opacity .25s ease 2s;
     z-index: 5;
   }
 
-  .calendar-wrap:hover .cal-nav:not(.is-disabled) {
+  .calendar-hover-zone:hover .cal-nav:not(.is-disabled) {
     opacity: 1;
     pointer-events: auto;
+    transition: opacity .2s ease 0s;
   }
 
   .cal-nav.is-disabled {
@@ -552,13 +561,15 @@
 <button type="button" class="export-btn" id="export-btn" title="Aktuelle Favoriten &amp; Reihenfolge als favorites.json herunterladen">⭳ Favoriten sichern</button>
 
 <div class="row row-calendar">
-  <div class="calendar-wrap">
-    <button type="button" class="cal-nav cal-prev" id="cal-prev" aria-label="Vorheriger Monat">‹</button>
-    <div class="calendar-widget">
-      <div class="calendar-header" id="calendar-header"></div>
-      <div class="calendar-grid" id="calendar-grid"></div>
+  <div class="calendar-hover-zone">
+    <div class="calendar-wrap">
+      <button type="button" class="cal-nav cal-prev" id="cal-prev" aria-label="Vorheriger Monat">‹</button>
+      <div class="calendar-widget">
+        <div class="calendar-header" id="calendar-header"></div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+      <button type="button" class="cal-nav cal-next" id="cal-next" aria-label="Nächster Monat">›</button>
     </div>
-    <button type="button" class="cal-nav cal-next" id="cal-next" aria-label="Nächster Monat">›</button>
   </div>
 </div>
 
